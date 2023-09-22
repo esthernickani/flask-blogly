@@ -10,6 +10,7 @@ app = Flask(__name__, template_folder = "templates")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
+app.app_context().push()
 
 connect_db(app)
 

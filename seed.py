@@ -4,11 +4,13 @@ from models import User, db
 from app import app
 
 # Create all tables
-db.drop_all()
-db.create_all()
+with app.app_context():
+    db.drop_all()
+    db.create_all()
+    User.query.delete()
 
 # If table isn't empty, empty it
-User.query.delete()
+
 
 # Add users
 alan = User(first_name = 'Alan', last_name = 'Alda')

@@ -3,3 +3,11 @@ img {
     height: 5rem;
 }
 
+input.title[type="text"] {
+    width: 10rem
+}
+
+input.content[type="text"] {
+    width: 10rem;
+    height: 3rem;
+}

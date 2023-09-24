@@ -13,5 +13,14 @@
     <form action="/users/{{user.id}}/delete" method="POST">
         <input type="submit" value="Delete">
     </form>
+    <h2 class="">Posts</h2>
+    {%if posts%}
+        <ul>
+        {% for post in posts %}
+            <li><a href="/posts/{{post.id}}" class="">{{post.title}}</a> </li>
+        {% endfor %}
+        </ul>
+    {%endif%}
+    <button class=""><a href="/users/{{user.id}}/posts/new" class="">Add Post</a></button>
 </body>
 </html>

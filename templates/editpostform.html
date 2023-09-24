@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Edit Post</h2>
+    <form action="/posts/{{post.id}}/edit" method="POST" class="">
+        <div class="form_container">
+            <div>
+                <label for="title" class="title">Title</label>
+                <input type="text" class="title" name="title" placeholder="{{post.title}}">
+            </div>
+            <div>
+                <label for="content" class="content">Post Content</label>
+                <textarea type="text" class="content" name="content" placeholder="{{post.content}}" rows="4" cols="50"></textarea>
+            </div>
+            <button class=""><a href="/users/{{post.user_id}}" class="">Cancel</a></button>
+            <input type="submit" value="Edit">
+        </div>
+    </form>
+</body>
+</html>

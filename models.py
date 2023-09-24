@@ -1,11 +1,13 @@
 """Models for Blogly."""
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
 def connect_db(app):
     db.app = app
     db.init_app(app)
+
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = True
@@ -29,5 +31,36 @@ class User(db.Model):
     def __repr__(self):
         """Show info about user"""
         u = self
-        return f"<User{u.id} {u.first_name} {u.last_name} {u.image_url}"
+        return f"<User{u.id} {u.first_name} {u.last_name} {u.image_url}>"
+    
+    post = db.relationship('Post', backref="posts", cascade="all, delete-orphan")
+
+"""Get now time"""
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M")
+
+class Post(db.Model):
+    """Posts"""
+    __tablename__ = "posts"
+    id = db.Column(db.Integer,
+                   primary_key = True,
+                   autoincrement = True)
+    title = db.Column(db.String,
+                      nullable = False,
+                      unique = True)
+    content = db.Column(db.String, 
+                        nullable = False)
+    created_at = db.Column(db.DateTime,
+                           default = datetime.utcnow,
+                           nullable = False)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.id'))
+    
+    def __repr__(self):
+        """Show info about post"""
+        p = self
+        return f"<Post{p.id} {p.title} {p.content} {p.created_at} {p.user_id}>"
+    
+    
+    
     

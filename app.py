@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, request
 """from flask_debugtoolbar import DebugToolbarExtension"""
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, Tag
 import pdb
 
 app = Flask(__name__, template_folder = "templates")
@@ -16,13 +16,6 @@ connect_db(app)
 
 app.config['SECRET_KEY'] = "hellothere"
 """toolbar = DebugToolbarExtension(app)"""
-
-def get_post():
-    """Get all the posts"""
-    posts = Post.query.all()
-    return posts
-
-posts = get_post()
 
 @app.route('/')
 def homepage():
@@ -176,4 +169,28 @@ def delete_post(post_id):
     current_user_posts = Post.query.filter(Post.user_id == current_post.user_id).all()
     return render_template("userdetail.html", user=user, posts=current_user_posts)
 
+"""Tags"""
+@app.route('/tags')
+def list_tags():
+    """Show list of tags in db"""
+    tags = Tag.query.all()
+    return render_template("alltags.html", tags=tags)
+
+@app.route('/tags/new')
+def show_addtag_form():
+    """Show a form to add tag"""
+    return render_template("newtag.html")
+
+@app.route('/tags/new', methods=["POST"])
+def handle_add_tag():
+    """Handle new tag"""
+    tag_name = request.form["tagname"]
+
+    if tag_name:
+        new_tag = Tag(name = tag_name)
+        db.session.add(new_tag)
+        db.session.commit()
+
+    tags = Tag.query.all()
+    return render_template("alltags.html", tags=tags)
 

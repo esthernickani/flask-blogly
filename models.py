@@ -1,5 +1,6 @@
 """Models for Blogly."""
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from datetime import datetime
 
 db = SQLAlchemy()
@@ -61,6 +62,29 @@ class Post(db.Model):
         p = self
         return f"<Post{p.id} {p.title} {p.content} {p.created_at} {p.user_id}>"
     
+    tags = db.relationship('Tag', secondary="PostTag", backref="tags", cascade="all, delete-orphan")
+    
+class Tag(db.Model):
+    """tags"""
+    __tablename__ = "tags"
+    id = db.Column(db.Integer,
+                   primary_key = True,
+                   autoincrement = True)
+    name = db.Column(db.String,
+                      nullable = False,
+                      unique = True)
+    
+    posts = db.relationship('Post', secondary="PostTag", cascade="all, delete-orphan")
+    
+class PostTag(db.Model):
+    """join post to tag"""
+    __tablename__ = "Post_Tag"
+    post_id = db.Column(db.Integer,
+                        db.ForeignKey('posts.id', ondelete='CASCADE'),
+                        primary_key = True)
+    tag_id = db.Column(db.Integer,
+                        db.ForeignKey('tags.id'),
+                        primary_key = True)
     
     
     

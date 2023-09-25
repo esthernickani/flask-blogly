@@ -1,9 +1,10 @@
 """Seed file to make sample data for users db."""
 
-from models import User, Post, db
+from models import User, Post, Tag, PostTag, db
 from app import app
 
 # Create all tables
+
 db.drop_all()
 db.create_all()
 User.query.delete()
@@ -29,4 +30,19 @@ db.session.commit()
 db.session.add_all([first_post, yet_another_post, flask_is_awesome_post])
 db.session.commit()
 
+#Add tags
+fun = Tag(name= 'Fun')
+more = Tag(name= 'Even more')
+bloop = Tag(name= 'Bloop')
+zope = Tag(name= 'Zope')
+
+db.session.add_all([fun, more, bloop, zope])
+db.session.commit()
+
+post = Post.query.get(2)
+tag = Tag.query.get(2)
+
+post_tag = PostTag(post_id=post.id, tag_id=tag.id)
+db.session.add(post_tag)
+db.session.commit()
 

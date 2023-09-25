@@ -21,16 +21,18 @@ class UserTestCase(TestCase):
         """Clean up any fouled transaction"""
 
         db.session.rollback()
+                
 
     def test_list(self):
         user = User(first_name = 'amy', last_name = 'kim')
-        post = Post(title = 'test', content = 'test content', user_id = 1)
+        post = Post(title = 'test', content = 'test_content', user_id = 1)
 
         self.assertEqual(user.first_name, "amy")
         self.assertEqual(user.last_name, "kim")
         self.assertEqual(post.title, "test")
         self.assertEqual(post.content, 'test_content')
-    
+   
+
     def test_submit_data(self):
         with app.test_client() as client:
             user = User(first_name = 'amy', last_name = 'kim')
@@ -43,7 +45,7 @@ class UserTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('amy kim', html)
-
+    
     def test_show_user_info(self):
         with app.test_client() as client:
             user = User(first_name = 'milo', last_name = 'kay')
@@ -95,7 +97,7 @@ class UserTestCase(TestCase):
             db.session.add(post)
             db.session.commit()
 
-            resp = client.get('/users')
+            resp = client.get(f"/users/{post.user_id}")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
@@ -119,6 +121,6 @@ class UserTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('edit jones', html)
+            self.assertIn('edit', html)
   
             

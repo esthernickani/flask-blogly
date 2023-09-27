@@ -120,7 +120,7 @@ def handle_add_post(user_id):
     alltags = []
     for tag in tags:
         if request.form.get(f"{tag.name}") == 'on':
-            alltags.append(tag.name)
+            alltags.append(tag)
         
     print(alltags)
 
@@ -129,7 +129,7 @@ def handle_add_post(user_id):
         db.session.add(new_post)
         db.session.commit()
 
-        for tag in tags:
+        for tag in alltags:
             new_post_tag = PostTag(post_id=new_post.id, tag_id=tag.id)
             db.session.add(new_post_tag)
             db.session.commit()
@@ -163,18 +163,20 @@ def show_post_edit_form(post_id):
     """show post edit form"""
     current_post = Post.query.get_or_404(post_id)
     tags = Tag.query.all()
+    posttags_id = PostTag.query.filter_by(post_id = current_post.id).all()
 
-    all_tags = []
+    current_postid_tags = [posttag_id.tag_id for posttag_id in posttags_id]
 
-    tags_id = PostTag.query.filter_by(post_id = current_post.id).all()
-    if tags_id:
-        for tag in tags_id:
-            id = tag.tag_id
-            tags = Tag.query.get_or_404(id)
-            all_tags.append(tags)
+    all_tags = [tag for tag in tags]
+    all_tags_id = [tag.id for tag in tags]
+    #if tags_id:
+        #for tag in tags_id:
+            #id = tag.tag_id
+            #tags = Tag.query.get_or_404(id)
+            #all_tags.append(tags)
     
 
-    return render_template("editpostform.html", post = current_post, tags=tags)
+    return render_template("editpostform.html", post = current_post, tags=all_tags, current_postid_tags=current_postid_tags)
 
 @app.route('/posts/<int:post_id>/edit', methods=["POST"])
 def handle_post_edit(post_id):
@@ -190,14 +192,38 @@ def handle_post_edit(post_id):
     current_post.title = title
     current_post.content = content
 
-    db.session.commit()
+    tags = Tag.query.all()
+    alltags = []
+    for tag in tags:
+        if request.form.get(f"{tag.name}") == 'on':
+            alltags.append(tag)
+        else:
+            PostTag.query.filter_by(post_id = current_post.id).delete()
+            db.session.commit()
+    
+    for tag in alltags:
+        tags_id = PostTag.query.filter_by(post_id = current_post.id).all()
+        previous_tags = [tag.tag_id for tag in tags_id]
+
+        if tag.id not in previous_tags:
+            another_tag = PostTag(post_id=current_post.id, tag_id=tag.id)
+            db.session.add(another_tag)
+            db.session.commit()
 
     current_post = Post.query.get_or_404(post_id)
     current_user = User.query.get_or_404(current_post.user_id)
     user_name = f"{current_user.first_name} {current_user.last_name}"
 
-    tags = Tag.query.all()
-    return render_template("postdetail.html", post = current_post, user_name = user_name, tags=tags)
+    current_post_tag = []
+
+    current_tags_id = PostTag.query.filter_by(post_id = current_post.id).all()
+    if current_tags_id:
+        for tag in current_tags_id:
+            id = tag.tag_id
+            tags = Tag.query.get_or_404(id)
+            current_post_tag.append(tags)
+
+    return render_template("postdetail.html", post = current_post, user_name = user_name, tags=current_post_tag)
 
 @app.route('/posts/<int:post_id>/delete')
 def delete_post(post_id):
@@ -269,4 +295,14 @@ def handle_edit_tag(tag_id):
     tags = Tag.query.all()
     
     return render_template("alltags.html", tags=tags)
-        
+
+@app.route('/tags/<int:tag_id>/delete', methods=["POST"])
+def delete_tag(tag_id):
+    """delete a tag"""
+    current_tag = Tag.query.get_or_404(tag_id)
+    PostTag.query.filter(PostTag.tag_id == current_tag.id).delete()
+    Tag.query.filter(Tag.id == tag_id).delete()
+    db.session.commit()
+
+    tags = Tag.query.all()
+    return render_template("alltags.html", tags=tags)

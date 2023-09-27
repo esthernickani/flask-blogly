@@ -19,7 +19,7 @@
                 <textarea type="text" class="content" name="content" placeholder="{{post.content}}" rows="4" cols="50"></textarea>
             </div>
             {% for tag in tags %}
-            <input type="checkbox" id="{{tag.name}}" name="{{tag.name}}"/>
+            <input type="checkbox" id="{{tag.name}}" name="{{tag.name}}" {%if tag.id in current_postid_tags%}checked{% endif %}/>
             <label for="{{tag.name}}">{{tag.name}}</label>
             {% endfor %}
             <button class=""><a href="/users/{{post.user_id}}" class="">Cancel</a></button>

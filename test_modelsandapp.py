@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User, Post
+from models import db, User, Post, Tag, PostTag
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///user_blogly_test'
 app.config['SQLALCHEMY_ECHO'] = False
@@ -122,5 +122,23 @@ class UserTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('edit', html)
+
+    def test_delete_tag(self):
+        with app.test_client() as client:
+            tag = Tag(name="testtag")
+            tag_delete = Tag(name="deletetag")
+
+            db.session.add(tag)
+            db.session.add(tag_delete)
+            db.session.commit()
+
+            tag2 =  Tag.query.all()[1]
+            resp = client.post(f"/tags/{tag2.id}/delete", follow_redirects = True)
+            html = resp.get_data(as_text=True)
+
+            self.assertIn('testtag', html)
+            self.assertNotIn('deletetag', html)
+            self.assertEqual(resp.status_code, 200)
+
   
             

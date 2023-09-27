@@ -14,7 +14,7 @@
             {% endfor %}
         </ul>
         <button class=""><a href="/tags/{{current_tag.id}}/edit" class="">Edit</a></button>
-        <button class=""><a href="" class="">Delete</a></button>
+        <button class=""><a href="/tags/{{current_tag.id}}/delete" class="">Delete</a></button>
     {% else %}
         <p>No post for this tag</p>
     {% endif %}

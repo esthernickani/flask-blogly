@@ -4,14 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{post.title}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h2>{{post.title}}</h2>
     <p>{{post.content}}</p>
     <p><i>By {{user_name}}</i></p>
 
-    <button class=""><a href="/users/{{post.user_id}}" class="">Cancel</a></button>
-    <button class=""><a href="/posts/{{post.id}}/edit" class="">Edit</a></button>
-    <button class=""><a href="/posts/{{post.id}}/delete" class="">Delete</a></button>
+    {% if tags %}
+        <span>Tags:</span>
+        {% for tag in tags %}
+            <button class="tag"><a href="/tags/{{tag.id}}" class="">{{tag.name}}</a></button>
+        {% endfor %}
+    {% endif %}
+
+    <div class="edits">
+        <button class=""><a href="/users/{{post.user_id}}" class="">Cancel</a></button>
+        <button class=""><a href="/posts/{{post.id}}/edit" class="">Edit</a></button>
+        <button class=""><a href="/posts/{{post.id}}/delete" class="">Delete</a></button>
+    </div>
 </body>
 </html>

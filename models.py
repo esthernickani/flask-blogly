@@ -61,8 +61,7 @@ class Post(db.Model):
         """Show info about post"""
         p = self
         return f"<Post{p.id} {p.title} {p.content} {p.created_at} {p.user_id}>"
-    
-    tags = db.relationship('Tag', secondary="PostTag", backref="tags", cascade="all, delete-orphan")
+
     
 class Tag(db.Model):
     """tags"""
@@ -74,11 +73,14 @@ class Tag(db.Model):
                       nullable = False,
                       unique = True)
     
-    posts = db.relationship('Post', secondary="PostTag", cascade="all, delete-orphan")
+    def __repr__(self):
+        """Show info about post"""
+        t = self
+        return f"<Tag{t.id} {t.name}>"
     
 class PostTag(db.Model):
     """join post to tag"""
-    __tablename__ = "Post_Tag"
+    __tablename__ = "post_tag"
     post_id = db.Column(db.Integer,
                         db.ForeignKey('posts.id', ondelete='CASCADE'),
                         primary_key = True)
@@ -86,5 +88,9 @@ class PostTag(db.Model):
                         db.ForeignKey('tags.id'),
                         primary_key = True)
     
+    def __repr__(self):
+        """Show info about post"""
+        pt = self
+        return f"<PostTag{pt.tag_id} {pt.post_id}>"
     
     

@@ -11,3 +11,20 @@ input.content[type="text"] {
     width: 10rem;
     height: 3rem;
 }
+
+.tag {
+    background-color: blue;
+    color: #FFFFFF;
+    border: 1px solid transparent;
+    padding: .5rem 1rem;
+    border-radius: 5px;
+}
+
+.tag a {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+.edits {
+    margin-top: 1rem;
+}

@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, request
 """from flask_debugtoolbar import DebugToolbarExtension"""
-from models import db, connect_db, User, Post, Tag
+from models import db, connect_db, User, Post, Tag, PostTag
 import pdb
 
 app = Flask(__name__, template_folder = "templates")
@@ -105,7 +105,8 @@ def delete_user(user_id):
 def new_post_form(user_id):
     """Show new post form"""
     current_user = User.query.get_or_404(user_id)
-    return render_template("newpostform.html", user = current_user)
+    tags = Tag.query.all()
+    return render_template("newpostform.html", user = current_user, tags=tags)
 
 @app.route('/users/<int:user_id>/posts/new', methods=["POST"])
 def handle_add_post(user_id):
@@ -114,14 +115,29 @@ def handle_add_post(user_id):
     content = request.form["content"]
     user_id = user_id
 
+    """check what tags were clicked"""
+    tags = Tag.query.all()
+    alltags = []
+    for tag in tags:
+        if request.form.get(f"{tag.name}") == 'on':
+            alltags.append(tag.name)
+        
+    print(alltags)
+
     if title and content:
         new_post = Post(title = title, content = content, user_id = user_id)
         db.session.add(new_post)
         db.session.commit()
 
+        for tag in tags:
+            new_post_tag = PostTag(post_id=new_post.id, tag_id=tag.id)
+            db.session.add(new_post_tag)
+            db.session.commit()
+
     user = User.query.get_or_404(user_id)
     current_user_posts = Post.query.filter(Post.user_id == user_id).all()
-    return render_template("userdetail.html", user=user, posts=current_user_posts)
+
+    return render_template("userdetail.html", user=user, posts=current_user_posts, tags=tags)
 
 @app.route('/posts/<int:post_id>')
 def show_post_detail(post_id):
@@ -129,13 +145,36 @@ def show_post_detail(post_id):
     current_post = Post.query.get_or_404(post_id)
     current_user = User.query.get_or_404(current_post.user_id)
     user_name = f"{current_user.first_name} {current_user.last_name}"
-    return render_template("postdetail.html", post = current_post, user_name = user_name)
+
+    all_tags = []
+
+    tags_id = PostTag.query.filter_by(post_id = current_post.id).all()
+    if tags_id:
+        for tag in tags_id:
+            id = tag.tag_id
+            tags = Tag.query.get_or_404(id)
+            all_tags.append(tags)
+        
+        
+    return render_template("postdetail.html", post = current_post, user_name = user_name, tags = all_tags)
 
 @app.route('/posts/<int:post_id>/edit')
 def show_post_edit_form(post_id):
     """show post edit form"""
     current_post = Post.query.get_or_404(post_id)
-    return render_template("editpostform.html", post = current_post)
+    tags = Tag.query.all()
+
+    all_tags = []
+
+    tags_id = PostTag.query.filter_by(post_id = current_post.id).all()
+    if tags_id:
+        for tag in tags_id:
+            id = tag.tag_id
+            tags = Tag.query.get_or_404(id)
+            all_tags.append(tags)
+    
+
+    return render_template("editpostform.html", post = current_post, tags=tags)
 
 @app.route('/posts/<int:post_id>/edit', methods=["POST"])
 def handle_post_edit(post_id):
@@ -156,7 +195,9 @@ def handle_post_edit(post_id):
     current_post = Post.query.get_or_404(post_id)
     current_user = User.query.get_or_404(current_post.user_id)
     user_name = f"{current_user.first_name} {current_user.last_name}"
-    return render_template("postdetail.html", post = current_post, user_name = user_name)
+
+    tags = Tag.query.all()
+    return render_template("postdetail.html", post = current_post, user_name = user_name, tags=tags)
 
 @app.route('/posts/<int:post_id>/delete')
 def delete_post(post_id):
@@ -194,3 +235,38 @@ def handle_add_tag():
     tags = Tag.query.all()
     return render_template("alltags.html", tags=tags)
 
+@app.route('/tags/<int:tag_id>')
+def show_tag_detail(tag_id):
+    """Show details about each tag"""
+    current_tag = Tag.query.get_or_404(tag_id)
+    posttags = PostTag.query.filter_by(tag_id = tag_id).all()
+
+    posts = []
+    for posttag in posttags:
+        postid = posttag.post_id
+        post = Post.query.get_or_404(postid)
+        posts.append(post)
+    
+    return render_template("tagdetail.html", posts=posts, current_tag=current_tag)
+
+@app.route('/tags/<int:tag_id>/edit')
+def show_edit_tag(tag_id):
+    """show Edit tag form"""
+    current_tag = Tag.query.get_or_404(tag_id)
+    
+    return render_template("edittag.html", tag=current_tag)
+
+@app.route('/tags/<int:tag_id>/edit', methods=["POST"])
+def handle_edit_tag(tag_id):
+    """handle Edit tag form"""
+    current_tag = Tag.query.get_or_404(tag_id)
+    tagname = request.form["tagname"]
+
+    tagname = tagname if tagname else current_tag.name
+
+    current_tag.name = tagname
+    db.session.commit()
+    tags = Tag.query.all()
+    
+    return render_template("alltags.html", tags=tags)
+        
